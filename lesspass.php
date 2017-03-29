@@ -83,5 +83,3 @@ function renderPassword($entropy, $passwordProfile) {
   list($charactersToAdd,$characterEntropy) = getOneCharPerRule($passwordEntropy, $rules);
   return insertStringPseudoRandomly($password, $characterEntropy, $charactersToAdd);
 }
-
-echo generatePassword('duckduckgo.com', 'test', 'test', $defaultPasswordProfile)."\n";
