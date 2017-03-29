@@ -75,7 +75,7 @@ class ApiTests extends TestCase
         $login = 'contact@example.org';
         $masterPassword = 'password';
         $passwordProfile = $this->getPasswordProfile([]);
-        $generatedPassword = generatePassword($site, $login, $masterPassword, null);
+        $generatedPassword = generatePassword($site, $login, $masterPassword, $passwordProfile);
         $this->assertEquals('WHLpUL)e00[iHR+w', $generatedPassword);
     }
 }
