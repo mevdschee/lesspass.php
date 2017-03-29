@@ -5,8 +5,7 @@ require_once __DIR__.'/../lesspass.php';
 
 class ApiTests extends TestCase
 {
-    public function testRenderPassword()
-    {
+    public function testRenderPassword() {
         $site = 'example.org';
         $login = 'contact@example.org';
         $masterPassword = 'password';
@@ -15,8 +14,7 @@ class ApiTests extends TestCase
         $this->assertEquals('WHLpUL)e00[iHR+w', $generatedPassword);
     }
 
-    public function testRenderPasswordNoSymbols()
-    {
+    public function testRenderPasswordNoSymbols() {
         $site = 'example.org';
         $login = 'contact@example.org';
         $masterPassword = 'password';
@@ -25,25 +23,16 @@ class ApiTests extends TestCase
         $this->assertEquals('MBAsB7b1Prt8Sl', $generatedPassword);
     }
 
-    public function testRenderPasswordOnlyDigits()
-    {
+    public function testRenderPasswordOnlyDigits() {
         $site = 'example.org';
         $login = 'contact@example.org';
         $masterPassword = 'password';
-        $passwordProfile = [
-            'length'=>6,
-            'counter'=>3,
-            'lowercase'=>false,
-            'uppercase'=>false,
-            'numbers'=>true,
-            'symbols'=>false
-        ];
+        $passwordProfile = ['length'=>6, 'counter'=>3, 'lowercase'=>false, 'uppercase'=>false, 'symbols'=>false];
         $generatedPassword = generatePassword($site, $login, $masterPassword, $passwordProfile);
         $this->assertEquals('117843', $generatedPassword);
     }
 
-    public function testRenderPasswordNoNumbers()
-    {
+    public function testRenderPasswordNoNumbers() {
         $site = 'example.org';
         $login = 'contact@example.org';
         $masterPassword = 'password';
@@ -52,8 +41,7 @@ class ApiTests extends TestCase
         $this->assertEquals('sB>{qF}wN%/-fm', $generatedPassword);
     }
 
-    public function testRenderPasswordWithDefaultOptions()
-    {
+    public function testRenderPasswordWithDefaultOptions() {
         $site = 'example.org';
         $login = 'contact@example.org';
         $masterPassword = 'password';
