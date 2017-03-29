@@ -5,29 +5,12 @@ require_once __DIR__.'/../lesspass.php';
 
 class EntropyTests extends TestCase
 {
-    private function getPasswordProfile($passwordProfile)
-    {
-        $defaultPasswordProfile = (object)[
-            'lowercase'=>true,
-            'uppercase'=>true,
-            'numbers'=>true,
-            'symbols'=>true,
-            'digest'=>'sha256',
-            'iterations'=>100000,
-            'keylen'=>32,
-            'length'=>16,
-            'counter'=>1,
-            'version'=>2
-        ];
-        return (object)array_merge((array)$defaultPasswordProfile,(array)$passwordProfile);
-    }
-
     public function testCalcEntropyPbkdf2WithDefaultParams()
     {
         $site = 'example.org';
         $login = 'contact@example.org';
         $masterPassword = 'password';
-        $passwordProfile = $this->getPasswordProfile([]);
+        $passwordProfile = getPasswordProfile([]);
         $entropy = calcEntropy($site, $login, $masterPassword, $passwordProfile);
         $this->assertEquals('dc33d431bce2b01182c613382483ccdb0e2f66482cbba5e9d07dab34acc7eb1e', $entropy);
     }
@@ -37,7 +20,7 @@ class EntropyTests extends TestCase
         $site = 'example.org';
         $login = 'contact@example.org';
         $masterPassword = 'password';
-        $passwordProfile = $this->getPasswordProfile([
+        $passwordProfile = getPasswordProfile([
             'iterations'=>8192,
             'keylen'=>16,
             'digest'=>'sha512',
@@ -52,7 +35,7 @@ class EntropyTests extends TestCase
         $site = 'example.org';
         $login = 'contact@example.org';
         $masterPassword = 'password';
-        $passwordProfile = $this->getPasswordProfile(['iterations'=>1,'keylen'=>16]);
+        $passwordProfile = getPasswordProfile(['iterations'=>1,'keylen'=>16]);
         $entropy = calcEntropy($site, $login, $masterPassword, $passwordProfile);
         $this->assertEquals('d3ec1e988dd0b3640c7491cd2c2a88b5', $entropy);
     }
@@ -63,7 +46,7 @@ class EntropyTests extends TestCase
         $site = 'example.org';
         $login = 'contact@example.org';
         $masterPassword = 'password';
-        $passwordProfile = $this->getPasswordProfile(['iterations'=>1,'keylen'=>16,'counter'=>2]);
+        $passwordProfile = getPasswordProfile(['iterations'=>1,'keylen'=>16,'counter'=>2]);
         $entropy = calcEntropy($site, $login, $masterPassword, $passwordProfile);
         $this->assertEquals('ddfb1136260f930c21f6d72f6eddbd40', $entropy);
     }

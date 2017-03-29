@@ -1,59 +1,60 @@
-var assert = chai.assert;
+<?php
+use PHPUnit\Framework\TestCase;
 
-describe('LessPass v2', function() {
-  describe('set of characters', function() {
-    it('get default set of characters', function() {
-      var setOfCharacters = LessPass._getSetOfCharacters();
-      assert.equal(
-        'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!"#$%&\'()*+,-./:;<=>?@[\\]^_`{|}~',
-        setOfCharacters
-      );
-      assert.equal(26 * 2 + 10 + 32, setOfCharacters.length);
-    });
-    it('get default set of characters concat rules in order', function() {
-      var setOfCharacters = LessPass._getSetOfCharacters(['lowercase', 'uppercase', 'numbers']);
-      assert.equal('abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789', setOfCharacters);
-      assert.equal(26 * 2 + 10, setOfCharacters.length);
-    });
-    it('get set of characters only lowercase', function() {
-      var setOfCharacters = LessPass._getSetOfCharacters(['lowercase']);
-      assert.equal('abcdefghijklmnopqrstuvwxyz', setOfCharacters);
-      assert.equal(26, setOfCharacters.length);
-    });
-    it('get set of characters only uppercase', function() {
-      var setOfCharacters = LessPass._getSetOfCharacters(['uppercase']);
-      assert.equal('ABCDEFGHIJKLMNOPQRSTUVWXYZ', setOfCharacters);
-      assert.equal(26, setOfCharacters.length);
-    });
-    it('get set of characters only numbers', function() {
-      var setOfCharacters = LessPass._getSetOfCharacters(['numbers']);
-      assert.equal('0123456789', setOfCharacters);
-      assert.equal(10, setOfCharacters.length);
-    });
-    it('get set of characters only symbols', function() {
-      var setOfCharacters = LessPass._getSetOfCharacters(['symbols']);
-      assert.equal('!"#$%&\'()*+,-./:;<=>?@[\\]^_`{|}~', setOfCharacters);
-      assert.equal(32, setOfCharacters.length);
-    });
-    it('generate one char per rules', function() {
-      var oneCharPerSetOfCharacters = LessPass._getOneCharPerRule(
-        bigInt(26 * 26),
-        ['lowercase', 'uppercase']
-      );
-      assert.equal('aA', oneCharPerSetOfCharacters.value);
-      assert.equal(2, oneCharPerSetOfCharacters.value.length);
-      assert.equal(1, oneCharPerSetOfCharacters.entropy);
-    });
-    it('configured rules', function() {
-      assert.deepEqual(['uppercase'], LessPass._getConfiguredRules({uppercase: true}));
-      assert.deepEqual(['lowercase', 'uppercase'], LessPass._getConfiguredRules({uppercase: true, lowercase: true}));
-      assert.deepEqual(['lowercase'], LessPass._getConfiguredRules({lowercase: true, symbols: false}));
-      assert.deepEqual(['lowercase', 'uppercase', 'numbers', 'symbols'], LessPass._getConfiguredRules({
-        lowercase: true,
-        uppercase: true,
-        symbols: true,
-        numbers: true
-      }));
-    });
-  });
-});
+require_once __DIR__.'/../lesspass.php';
+
+class SetOfCharacterTests extends TestCase
+{
+    function testGetDefaultSetOfCharacters() {
+        $setOfCharacters = getSetOfCharacters();
+        $this->assertEquals(
+          'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!"#$%&\'()*+,-./:;<=>?@[\\]^_`{|}~',
+          $setOfCharacters
+        );
+        $this->assertEquals(26 * 2 + 10 + 32, strlen($setOfCharacters));
+    }
+
+    function testGetDefaultSetOfCharactersConcatRulesInOrder() {
+        $setOfCharacters = getSetOfCharacters(['lowercase', 'uppercase', 'numbers']);
+        $this->assertEquals('abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789', $setOfCharacters);
+        $this->assertEquals(26 * 2 + 10, strlen($setOfCharacters));
+    }
+
+    function testgetSetOfCharactersOnlyLowercase() {
+        $setOfCharacters = getSetOfCharacters(['lowercase']);
+        $this->assertEquals('abcdefghijklmnopqrstuvwxyz', $setOfCharacters);
+        $this->assertEquals(26, strlen($setOfCharacters));
+    }
+
+    function testgetSetOfCharactersOnlyUppercase() {
+        $setOfCharacters = getSetOfCharacters(['uppercase']);
+        $this->assertEquals('ABCDEFGHIJKLMNOPQRSTUVWXYZ', $setOfCharacters);
+        $this->assertEquals(26, strlen($setOfCharacters));
+    }
+
+    function testgetSetOfCharactersOnlyNumbers() {
+        $setOfCharacters = getSetOfCharacters(['numbers']);
+        $this->assertEquals('0123456789', $setOfCharacters);
+        $this->assertEquals(10, strlen($setOfCharacters));
+    }
+
+    function testgetSetOfCharactersOnlySymbols() {
+        $setOfCharacters = getSetOfCharacters(['symbols']);
+        $this->assertEquals('!"#$%&\'()*+,-./:;<=>?@[\\]^_`{|}~', $setOfCharacters);
+        $this->assertEquals(32, strlen($setOfCharacters));
+    }
+
+    function testGenerateOneCharPerRule() {
+        list($value,$entropy) = getOneCharPerRule(gmp_init(26 * 26), ['lowercase', 'uppercase']);
+        $this->assertEquals('aA', $value);
+        $this->assertEquals(2, strlen($value));
+        $this->assertEquals(1, (int)$entropy);
+    }
+
+    function testConfiguredRules() {
+        $this->assertEquals(['uppercase'], getConfiguredRules((object)['uppercase'=>true]));
+        $this->assertEquals(['lowercase', 'uppercase'], getConfiguredRules((object)['uppercase'=>true, 'lowercase'=>true]));
+        $this->assertEquals(['lowercase'], getConfiguredRules((object)['lowercase'=>true, 'symbols'=>false]));
+        $this->assertEquals(['lowercase', 'uppercase', 'numbers', 'symbols'], getConfiguredRules((object)['lowercase'=>true, 'uppercase'=>true, 'symbols'=>true, 'numbers'=>true]));
+    }
+}

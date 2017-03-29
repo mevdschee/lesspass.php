@@ -1,18 +1,4 @@
 <?php
-$defaultPasswordProfile = (object)[
-  'version'=>2,
-  'lowercase'=>true,
-  'numbers'=>true,
-  'uppercase'=>true,
-  'symbols'=>true,
-  'keylen'=>32,
-  'digest'=>'sha256',
-  'length'=>16,
-//  'index'=>1, // see https://github.com/lesspass/lesspass/issues/178
-  'counter'=>1,
-  'iterations'=>100000
-];
-
 $characterSubsets = (object)[
   'lowercase'=>'abcdefghijklmnopqrstuvwxyz',
   'uppercase'=>'ABCDEFGHIJKLMNOPQRSTUVWXYZ',
@@ -20,7 +6,24 @@ $characterSubsets = (object)[
   'symbols'=>'!"#$%&\'()*+,-./:;<=>?@[\\]^_`{|}~'
 ];
 
-function generatePassword($site, $login, $masterPassword, $passwordProfile) {
+function getPasswordProfile($passwordProfile) {
+  $defaultPasswordProfile = (object)[
+    'lowercase'=>true,
+    'uppercase'=>true,
+    'numbers'=>true,
+    'symbols'=>true,
+    'digest'=>'sha256',
+    'iterations'=>100000,
+    'keylen'=>32,
+    'length'=>16,
+    'counter'=>1,
+    'version'=>2
+  ];
+  return (object)array_merge((array)$defaultPasswordProfile,(array)$passwordProfile);
+}
+
+function generatePassword($site, $login, $masterPassword, $passwordProfile=null) {
+  $passwordProfile = getPasswordProfile($passwordProfile);
   $entropy = calcEntropy($site, $login, $masterPassword, $passwordProfile);
   return renderPassword($entropy, $passwordProfile);
 }
@@ -30,7 +33,7 @@ function calcEntropy($site, $login, $masterPassword, $passwordProfile) {
   return hash_pbkdf2($passwordProfile->digest, $masterPassword, $salt, $passwordProfile->iterations, $passwordProfile->keylen*2);
 }
 
-function getSetOfCharacters($rules) {
+function getSetOfCharacters($rules=null) {
   global $characterSubsets;
   if (!$rules) {
     return $characterSubsets->lowercase . $characterSubsets->uppercase . $characterSubsets->numbers . $characterSubsets->symbols;
@@ -71,9 +74,9 @@ function getOneCharPerRule($entropy, $rules) {
 }
 
 function getConfiguredRules($passwordProfile) {
-  return array_filter(['lowercase', 'uppercase', 'numbers', 'symbols'], function ($rule) use ($passwordProfile) {
-    return $passwordProfile->$rule;
-  });
+  return array_merge(array_filter(['lowercase', 'uppercase', 'numbers', 'symbols'], function ($rule) use ($passwordProfile) {
+    return isset($passwordProfile->$rule) && $passwordProfile->$rule;
+  }));
 }
 
 function renderPassword($entropy, $passwordProfile) {
