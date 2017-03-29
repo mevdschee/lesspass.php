@@ -1,70 +1,80 @@
-var assert = chai.assert;
+<?php
+use PHPUnit\Framework\TestCase;
 
-describe('LessPass v2', function() {
-  var defaultPasswordProfile = {
-    length: 16,
-    lowercase: true,
-    uppercase: true,
-    numbers: true,
-    symbols: true
-  };
-  it('render password use remainder of long division beetween entropy and set of chars length as an index', function() {
-    var entropy = 'dc33d431bce2b01182c613382483ccdb0e2f66482cbba5e9d07dab34acc7eb1e';
-    assert.equal('W', LessPass._renderPassword(entropy, defaultPasswordProfile)[0]);
-  });
-  it('render password use quotient as second entropy recursively', function() {
-    var entropy = 'dc33d431bce2b01182c613382483ccdb0e2f66482cbba5e9d07dab34acc7eb1e';
-    assert.equal('H', LessPass._renderPassword(entropy, defaultPasswordProfile)[1]);
-  });
-  it('render password has default length of 16', function() {
-    var entropy = 'dc33d431bce2b01182c613382483ccdb0e2f66482cbba5e9d07dab34acc7eb1e';
-    assert.equal(16, LessPass._renderPassword(entropy, defaultPasswordProfile).length);
-  });
-  it('render password can specify length', function() {
-    var entropy = 'dc33d431bce2b01182c613382483ccdb0e2f66482cbba5e9d07dab34acc7eb1e';
-    var passwordProfile = {
-      length: 20,
-      lowercase: true,
-      uppercase: true,
-      numbers: true,
-      symbols: true
-    };
-    assert.equal(20, LessPass._renderPassword(entropy, passwordProfile).length);
-  });
-  it('include one char per set of characters', function() {
-    var password = LessPass._insertStringPseudoRandomly('123456', bigInt(7 * 6 + 2), 'uT');
-    assert.equal('T12u3456', password);
-  });
-  it('render password return at least one char in every characters set', function() {
-    var entropy = 'dc33d431bce2b01182c613382483ccdb0e2f66482cbba5e9d07dab34acc7eb1e';
-    var passwordProfile = {
-      length: 6,
-      lowercase: true,
-      uppercase: true,
-      numbers: true,
-      symbols: true,
-    };
-    var generatedPassword = LessPass._renderPassword(entropy, passwordProfile);
-    var passwordLength = generatedPassword.length;
-    var lowercaseOk = false;
-    var uppercaseOk = false;
-    var numbersOk = false;
-    var symbolsOk = false;
-    while (passwordLength--) {
-      if ('abcdefghijklmnopqrstuvwxyz'.indexOf(generatedPassword[passwordLength]) !== -1) {
-        lowercaseOk = true;
-      }
-      if ('ABCDEFGHIJKLMNOPQRSTUVWXYZ'.indexOf(generatedPassword[passwordLength]) !== -1) {
-        uppercaseOk = true;
-      }
-      if ('0123456789'.indexOf(generatedPassword[passwordLength]) !== -1) {
-        numbersOk = true;
-      }
-      if ('!"#$%&\'()*+,-./:;<=>?@[\\]^_`{|}~'.indexOf(generatedPassword[passwordLength]) !== -1) {
-        symbolsOk = true;
-      }
+require_once __DIR__.'/../lesspass.php';
+
+class RenderPasswordTests extends TestCase
+{
+    private function getPasswordProfile($passwordProfile)
+    {
+        $defaultPasswordProfile = (object)[
+            'lowercase'=>true,
+            'uppercase'=>true,
+            'numbers'=>true,
+            'symbols'=>true,
+            'digest'=>'sha256',
+            'iterations'=>100000,
+            'keylen'=>32,
+            'length'=>16,
+            'counter'=>1,
+            'version'=>2
+        ];
+        return (object)array_merge((array)$defaultPasswordProfile,(array)$passwordProfile);
     }
-    assert.equal(6, generatedPassword.length);
-    assert(lowercaseOk && uppercaseOk && numbersOk && symbolsOk, 'there is no at least one char in every characters set');
-  });
-});
+
+    function testRenderPasswordUseRemainderOfLongDivisionBetweenEntropyAndSetOfCharsLengthAsAnIndex() {
+        $entropy = 'dc33d431bce2b01182c613382483ccdb0e2f66482cbba5e9d07dab34acc7eb1e';
+        $passwordProfile = $this->getPasswordProfile([]);
+        $this->assertEquals('W', renderPassword($entropy, $passwordProfile)[0]);
+    }
+
+    function testRenderPasswordUseQuotientAsSecondEntropyRecursively() {
+        $entropy = 'dc33d431bce2b01182c613382483ccdb0e2f66482cbba5e9d07dab34acc7eb1e';
+        $passwordProfile = $this->getPasswordProfile([]);
+        $this->assertEquals('H', renderPassword($entropy, $passwordProfile)[1]);
+    }
+
+    function testRenderPasswordHasDefaultLengthOfSixteen() {
+        $entropy = 'dc33d431bce2b01182c613382483ccdb0e2f66482cbba5e9d07dab34acc7eb1e';
+        $passwordProfile = $this->getPasswordProfile([]);
+        $this->assertEquals(16, strlen(renderPassword($entropy, $passwordProfile)));
+    }
+
+    function testRenderPasswordCanSpecifyLength() {
+        $entropy = 'dc33d431bce2b01182c613382483ccdb0e2f66482cbba5e9d07dab34acc7eb1e';
+        $passwordProfile = $this->getPasswordProfile(['length'=>20]);
+        $this->assertEquals(20, strlen(renderPassword($entropy, $passwordProfile)));
+    }
+
+    function testIncludeOneCharPerSetOfCharacters() {
+        $password = insertStringPseudoRandomly('123456', gmp_init(7 * 6 + 2), 'uT');
+        $this->assertEquals('T12u3456', $password);
+    }
+
+    function testRenderPasswordReturnAtLeastOneCharInEveryCharacterSet() {
+        $entropy = 'dc33d431bce2b01182c613382483ccdb0e2f66482cbba5e9d07dab34acc7eb1e';
+        $passwordProfile = $this->getPasswordProfile(['length'=>6]);
+        $generatedPassword = renderPassword($entropy, $passwordProfile);
+        $passwordLength = strlen($generatedPassword);
+        $lowercaseOk = false;
+        $uppercaseOk = false;
+        $numbersOk = false;
+        $symbolsOk = false;
+        while ($passwordLength--) {
+            if (strpos('abcdefghijklmnopqrstuvwxyz',$generatedPassword[$passwordLength]) !== false) {
+                $lowercaseOk = true;
+            }
+            if (strpos('ABCDEFGHIJKLMNOPQRSTUVWXYZ',$generatedPassword[$passwordLength]) !== false) {
+                $uppercaseOk = true;
+            }
+            if (strpos('0123456789',$generatedPassword[$passwordLength]) !== false) {
+                $numbersOk = true;
+            }
+            if (strpos('!"#$%&\'()*+,-./:;<=>?@[\\]^_`{|}~',$generatedPassword[$passwordLength]) !== false) {
+                $symbolsOk = true;
+            }
+        }
+        $this->assertEquals(6, strlen($generatedPassword));
+        $this->assertEquals(true, $lowercaseOk && $uppercaseOk && $numbersOk && $symbolsOk, 'there is not at least one char in every characters set');
+    }
+}

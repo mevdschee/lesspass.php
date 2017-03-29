@@ -3,7 +3,7 @@ use PHPUnit\Framework\TestCase;
 
 require_once __DIR__.'/../lesspass.php';
 
-class ApiTests extends TestCase
+class EntropyTests extends TestCase
 {
     private function getPasswordProfile($passwordProfile)
     {
